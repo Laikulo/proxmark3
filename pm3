@@ -52,13 +52,37 @@ SHOWLIST=false
 function check_pm3_bt_name {
     # (name_to_check)
     # Returns true if the name is a proxmark
-	for possible_name in "${FINDBTNAMES[@]}"; do
+    for possible_name in "${FINDBTNAMES[@]}"; do
         if [[ $possible_name == $1 ]]; then 
             return 0
         fi
     done
     # We have reached the end of the list with no matches
     return 1
+}
+
+function pm3_bt_names_as_awk {
+    # (array_name)
+    local awk_out
+    local split_char
+    split_char = "|"
+    awk_out='split(\"'
+
+    local is_first
+    is_first=yes
+
+    for possible_name in "${FINDBTNAMES[@]}"; do
+        if [[ $is_first ]]; then
+            unset is_first
+        else
+            awk_out="$awk_out$splitchar"
+        fi
+        awk_out="$awk_out$possible_name"
+    done
+
+    awk_out="$awk_out\", $1);"
+
+    print "$awk_out"
 }
 
 function get_pm3_list_Linux {
