@@ -9,6 +9,9 @@ FINDBTDONGLE=true
 FINDBTRFCOMM=true
 #   Shall we look for registered BT device ? (Linux only)
 FINDBTDIRECT=true
+# The list of BT device names to look for
+typeset -a FINDBTNAMES
+FINDBTNAMES=(PM3_RDV4 "Proxmark3 SE")
 
 PM3PATH=$(dirname "$0")
 EVALENV=""
@@ -45,6 +48,18 @@ if [ "$EVALENV" != "" ]; then
 fi
 PM3LIST=()
 SHOWLIST=false
+
+function check_pm3_bt_name {
+    # (name_to_check)
+    # Returns true if the name is a proxmark
+	for possible_name in "${FINDBTNAMES[@]}"; do
+        if [[ $possible_name == $1 ]]; then 
+            return 0
+        fi
+    done
+    # We have reached the end of the list with no matches
+    return 1
+}
 
 function get_pm3_list_Linux {
     N=$1
@@ -100,7 +115,7 @@ function get_pm3_list_Linux {
             DEV=${DEVMAC/@*/}
             MAC=${DEVMAC/*@/}
             # check which are Proxmark3 and, side-effect, if they're actually present
-            if hcitool name "$MAC" | grep -q "PM3"; then
+            if check_pm3_bt_name "$(hcitool name "$MAC")"; then
                 PM3LIST+=("/dev/$DEV")
                 if [ ${#PM3LIST[*]} -ge "$N" ]; then
                     return
