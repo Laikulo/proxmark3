@@ -149,8 +149,9 @@ function get_pm3_list_Linux {
     fi
     if $FINDBTDIRECT; then
         # check if the MAC of a Proxmark3 was registered in the known devices
+        # IMPORTANT: The below section must be indented with tabs. Spaces are not supported in bash heredocs
 	read -r -d '' filter_awk <<-'ENDAWK'
-        BEGIN { }
+	BEGIN { }
 	/"Address"/ {
 		getline;
 		gsub(/"/,"",$3);
@@ -162,6 +163,7 @@ function get_pm3_list_Linux {
 			print a
 	}
 	ENDAWK
+        # Normal indentaion resumes
         for MAC in $(dbus-send --system --print-reply --type=method_call --dest='org.bluez' '/' org.freedesktop.DBus.ObjectManager.GetManagedObjects 2>/dev/null|\
                          awk "$filter_awk"); do
             PM3LIST+=("bt:$MAC")
